@@ -1,4 +1,4 @@
-# Snfoil::Policy
+# SnFoil::Context
 
 ![build](https://github.com/limited-effort/snfoil-context/actions/workflows/main.yml/badge.svg) <a href="https://codeclimate.com/github/limited-effort/snfoil-context/maintainability"><img src="https://api.codeclimate.com/v1/badges/6a7a2f643707c17cb879/maintainability" /></a>
 
