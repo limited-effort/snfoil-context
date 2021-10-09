@@ -1,6 +1,6 @@
 # Snfoil::Policy
 
-![build](https://github.com/limited-effort/snfoil-context/actions/workflows/main.yml/badge.svg) <a href="https://codeclimate.com/github/limited-effort/snfoil-policy/maintainability"><img src="https://api.codeclimate.com/v1/badges/81c3abdb068a2305d4ce/maintainability" /></a>
+![build](https://github.com/limited-effort/snfoil-context/actions/workflows/main.yml/badge.svg) <a href="https://codeclimate.com/github/limited-effort/snfoil-context/maintainability"><img src="https://api.codeclimate.com/v1/badges/6a7a2f643707c17cb879/maintainability" /></a>
 
 SnFoil Contexts are a simple way to insure a workflow pipeline can be easily established end extended.  It helps by creating workflow, allowing additional in steps at specific intervals, and reacting to a success or failure, you should find your code being more maintainable and testable.
 
