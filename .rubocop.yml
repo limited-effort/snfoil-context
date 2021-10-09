@@ -1,0 +1,39 @@
+require:
+  - rubocop-performance
+  - rubocop-rspec
+
+AllCops:
+  NewCops: enable
+  SuggestExtensions: false
+  TargetRubyVersion: 2.5.0
+
+# ================ LAYOUT ==============
+Layout/LineLength:
+  Max: 150
+
+# ================ LINT ================
+Lint/AmbiguousBlockAssociation:
+  Exclude:
+    - spec/**/*_spec.rb
+
+Lint/EmptyClass:
+  Exclude:
+    - spec/**/*_spec.rb
+
+# ================ Metics ================
+Metrics/BlockLength:
+  Exclude:
+    - spec/**/*_spec.rb
+
+# ================ RSPEC ================
+RSpec/FilePath:
+  Enabled: false
+
+RSpec/MultipleExpectations:
+  Max: 5
+
+RSpec/MultipleMemoizedHelpers:
+  Enabled: false
+
+RSpec/NestedGroups:
+  Max: 5
