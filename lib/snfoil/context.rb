@@ -38,9 +38,17 @@ module SnFoil
         raise SnFoil::Context::Error, "action #{name} already defined for #{self.name}" if (@defined_actions ||= []).include?(name)
 
         @defined_actions << name
-        setup_hooks(name)
+        define_workflow_hooks(name)
         define_action_primary(name, with, block)
       end
+    end
+
+    def run_action_group(group_name, **options)
+      hooks = self.class.instance_variable_get("@#{group_name}_hooks") || []
+      options = hooks.reduce(options) { |opts, hook| run_hook(hook, opts) }
+      options = send(group_name, **options) if respond_to?(group_name)
+
+      options
     end
 
     private
@@ -66,7 +74,7 @@ module SnFoil
         end
       end
 
-      def setup_hooks(name)
+      def define_workflow_hooks(name)
         hook_builder('setup_%s', name)
         hook_builder('before_%s', name)
         hook_builder('after_%s_success', name)
@@ -97,14 +105,6 @@ module SnFoil
       return send(method, **options) if method
 
       instance_exec options, &block
-    end
-
-    def run_action_group(group_name, **options)
-      options = self.class.instance_variable_get("@#{group_name}_hooks")
-                    .reduce(options) { |opts, hook| run_hook(hook, opts) }
-      options = send(group_name, **options) if respond_to?(group_name)
-
-      options
     end
   end
 end
