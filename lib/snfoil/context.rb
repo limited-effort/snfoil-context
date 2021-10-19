@@ -54,7 +54,7 @@ module SnFoil
 
     def run_interval(interval, **options)
       hooks = self.class.instance_variable_get("@#{interval}_hooks") || []
-      options = hooks.reduce(options) { |opts, hook| run_hook(hook, opts) }
+      options = hooks.reduce(options) { |opts, hook| run_hook(hook, **opts) }
       send(interval, **options)
     end
 
@@ -72,7 +72,7 @@ module SnFoil
       end
 
       def define_action_primary(name, method, block) # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
-        define_method(name) do |**options| # rubocop:disable Metrics/MethodLength
+        define_method(name) do |*_args, **options| # rubocop:disable Metrics/MethodLength
           options[:action] ||= name.to_sym
 
           options = run_interval(format('setup_%s', name), **options)
@@ -113,7 +113,7 @@ module SnFoil
     def run_action_primary(method, block, **options)
       return send(method, **options) if method
 
-      instance_exec options, &block
+      instance_exec(**options, &block)
     end
   end
 end

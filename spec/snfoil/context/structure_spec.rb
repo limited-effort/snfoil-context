@@ -10,7 +10,7 @@ RSpec.describe SnFoil::Context::Structure do
     let(:canary) { Canary.new }
 
     context 'with an action' do
-      before { including_class.authorize(:create) { |_options| canary.sing('create') } }
+      before { including_class.authorize(:create) { |**_options| canary.sing('create') } }
 
       it 'populates the authorizations object' do
         expect(including_class.i_authorizations.keys).to include :create
@@ -18,7 +18,7 @@ RSpec.describe SnFoil::Context::Structure do
     end
 
     context 'without an action' do
-      before { including_class.authorize { |_options| canary.sing('nil') } }
+      before { including_class.authorize { |**_options| canary.sing('nil') } }
 
       it 'populates the authorizations object' do
         expect(including_class.i_authorizations.keys).to include nil
@@ -26,11 +26,11 @@ RSpec.describe SnFoil::Context::Structure do
     end
 
     context 'with an action already defined' do
-      before { including_class.authorize(:create) { |_options| canary.sing('create') } }
+      before { including_class.authorize(:create) { |**_options| canary.sing('create') } }
 
       it 'raises an error' do
         expect do
-          including_class.authorize(:create) { |_options| canary.sing('other') }
+          including_class.authorize(:create) { |**_options| canary.sing('other') }
         end.to raise_error SnFoil::Context::Error
       end
     end
@@ -40,7 +40,7 @@ RSpec.describe SnFoil::Context::Structure do
     let(:canary) { Canary.new }
 
     context 'with a default configured action' do
-      before { including_class.authorize { |o| o[:canary].sing('nil') } }
+      before { including_class.authorize { |**o| o[:canary].sing('nil') } }
 
       it 'uses the default' do
         including_class.new.authorize(:create, canary: canary)
@@ -49,7 +49,7 @@ RSpec.describe SnFoil::Context::Structure do
     end
 
     context 'with a configured action' do
-      before { including_class.authorize(:create) { |o| o[:canary].sing('create') } }
+      before { including_class.authorize(:create) { |**o| o[:canary].sing('create') } }
 
       it 'uses the configured action' do
         including_class.new.authorize(:create, canary: canary)
@@ -59,8 +59,8 @@ RSpec.describe SnFoil::Context::Structure do
 
     context 'with a default configured action and configured action' do
       before do
-        including_class.authorize { |o| o[:canary].sing(nil) }
-        including_class.authorize(:create) { |o| o[:canary].sing('create') }
+        including_class.authorize { |**o| o[:canary].sing(nil) }
+        including_class.authorize(:create) { |**o| o[:canary].sing('create') }
       end
 
       it 'uses the configured action over the default action' do
@@ -71,7 +71,7 @@ RSpec.describe SnFoil::Context::Structure do
     end
 
     context 'with an unconfigured action and no default action' do
-      before { including_class.authorize(:create) { |o| o[:canary].sing('create') } }
+      before { including_class.authorize(:create) { |**o| o[:canary].sing('create') } }
 
       it 'does nothing' do
         including_class.new.authorize(:update, canary: canary)
