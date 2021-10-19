@@ -15,7 +15,112 @@ gem 'snfoil-context'
 ## Usage
 While contexts are powerful, they aren't a magic bullet.  Each function should strive to only contain a single purpose.  This also has the added benefit of outlining some basic tests - if it is in a function it should have a related test.
 
-### Action
+
+### Quickstart Example
+
+```ruby
+require 'snfoil/context'
+
+class TokenContext
+  include SnFoil::Context
+
+  interval :always
+
+  action(:create) { |options| options[:object].save }
+  action(:expire) { |options| options[:object].update(expired_at: Time.current) }
+
+  # log the current action. . . because reasons?
+  always { |options| LocalLogger.debug "START Running #{options[:action]}" }
+
+  # run always interval
+  setup_expire { |options| run_interval(:always, **options) }
+  setup_create { |options| run_interval(:always, **options) }
+
+  # inject created_by
+  setup_create { |options| options[:params][:created_by] = entity }
+
+  # initialize token
+  before_create do |options|
+    options[:object] = Token.create(options[:params])
+    options
+  end
+
+  # send token email
+  after_create_success { |options| TokenMailer.new(token: option[:object]) }
+
+  # log expiration error
+  after_expire_failure { |options| ErrorLogger.notify(error: options[:object].errors) }
+end
+```
+
+
+### Initialize
+
+When you `new` up a SnFoil Context you should provide the entity running the actions.  This will usually be a user but you can pass in anything.  This will be accessible from within the context as `entity`.
+
+```ruby
+  TokenContext.new(current_user)
+```
+
+### Intervals
+Intervals are a collection of `Proc` functions and a final method.  Each `proc` of the interval will pass the return of the first to the next.
+
+You can run an interval by calling `run_interval` with the interval name as the first argument and an optional options keyword arguments.
+
+```ruby
+class TokenContext
+  include SnFoil::Context
+
+  interval :demo
+
+  def demo(**options)
+    puts 'Demo Method'
+    options
+  end
+
+  demo do |options|
+    puts "First Proc"
+    puts options
+
+    options[:foo] = :bar
+
+    options
+  end
+
+  demo do |options|
+    puts "Second Proc"
+    puts options
+
+    options
+  end
+end
+
+TokenContext.new.run_interval(:demo, lorem: :ipsum)
+  # console>    First Proc
+  # console>    { lorem: :ipsum }
+  # console>    Second Proc
+  # console>    { foo: :bar, lorem: :ipsum }
+  # console>    Demo Method
+```
+
+### Multiple Intervals
+
+You can define intervals one at a time
+
+```ruby
+  interval :demo
+  interval :production
+```
+
+They can also be define in bulk using `intervals`
+
+```ruby
+  intervals :demo, :production
+```
+
+### Actions
+Actions are a group of intervals that create a workflow around a single primary function.
+
 To start you will need to define an action.  
 
 Arguments:
@@ -30,16 +135,30 @@ require 'snfoil/context'
 class TokenContext
   include SnFoil::Context
 
-  action :expire { |options| options[:object].update(expired_at: Time.current) }
+  ...
+
+  action(:expire) { |options| options[:object].update(expired_at: Time.current) }
 end
 ```
 
-This will generate the methods and hooks of the pipeline.  In this example the following get made:
+This will generate the intervals of the pipeline.  In this example the following get made:
 * setup_expire
 * before_expire
 * after_expire_success
 * after_expire_failure
 * after_expire
+
+Now you can trigger the workflow by calling the action as a method on an instance of the context.
+
+```ruby
+class TokenContext
+  include SnFoil::Context
+
+  action(:expire) { |options| options[:object].update(expired_at: Time.current) }
+end
+
+TokenContext.new(current_user).expire(object: current_token)
+```
 
 If you want to reuse the primary action or just prefer methods, you can pass in the method name you would like to call, rather than providing a block.  If a method name and a block is provided, the block is ignored. 
 
@@ -59,10 +178,10 @@ class TokenContext
 end
 ```
 
-#### Primary Actions
-The primary action is the function that determine whether or not the action is successful.  To do this, the primary action must always return a truthy value if the action was successful, or a falsey one if it failed.
+#### Primary Function
+The primary function is the function that determine whether or not the action is successful.  To do this, the primary function must always return a truthy value if the action was successful, or a falsey one if it failed.
 
-The primary action is passed one argument which is the return value of the closest preceeding interval function.
+The primary function is passed one argument which is the return value of the closest preceeding interval function.
 
 ```ruby
 # lib/contexts/token_context
@@ -85,59 +204,59 @@ class TokenContext
 end
 ```
 
-#### Intervals
+#### Action Intervals
 The following are the intervals SnFoil Contexts sets up in the order they occur.  The suggested uses are just very simply examples.  You can chain contexts to setup very complex interactions in a very easy to manage workflow.
 
 <table>
-    <thead>
-        <th>Name</th>
-        <th>Suggested Use</th>
-    </thead>
-    <tbody>
-        <tr>
-            <td>setup_&lt;action&gt;</td>
-            <td>
-              <div>* find or create a model</div>
-              <div>* setup params needed later in the action</div>
-              <div>* set scoping </div>
-            </td>
-        </tr>
-        <tr>
-            <td>before_&lt;action&gt;</td>
-            <td>
-                <div>* alter model or set attributes</div>
-            </td>
-        </tr>
-        <tr>
-            <td>primary action</td>
-            <td>
-                <div>* persist database changes</div>
-                <div>* make primary network call</div>
-            </td>
-        </tr>
-        <tr>
-            <td>after_&lt;action&gt;_success</td>
-            <td>
-              <div>* setup additional relationships</div>
-              <div>* success specific logging</div>
-            </td>
-        </tr>
-        <tr>
-            <td>after_&lt;action&gt;_failure</td>
-            <td>
-              <div>* cleanup failed remenants</div>
-              <div>* call bug tracker</div>
-              <div>* failure specific logging</div>
-            </td>
-        </tr>
-        <tr>
-            <td>after_&lt;action&gt;</td>
-            <td>
-              <div>* perform necessary required cleanup</div>
-              <div>* log outcome</div>
-            </td>
-        </tr>
-    </tbody>
+  <thead>
+    <th>Name</th>
+    <th>Suggested Use</th>
+  </thead>
+  <tbody>
+    <tr>
+      <td>setup_&lt;action&gt;</td>
+      <td>
+        <div>* find or create a model</div>
+        <div>* setup params needed later in the action</div>
+        <div>* set scoping </div>
+      </td>
+    </tr>
+    <tr>
+      <td>before_&lt;action&gt;</td>
+      <td>
+        <div>* alter model or set attributes</div>
+      </td>
+    </tr>
+    <tr>
+      <td>primary action</td>
+      <td>
+        <div>* persist database changes</div>
+        <div>* make primary network call</div>
+      </td>
+    </tr>
+    <tr>
+      <td>after_&lt;action&gt;_success</td>
+      <td>
+        <div>* setup additional relationships</div>
+        <div>* success specific logging</div>
+      </td>
+    </tr>
+    <tr>
+      <td>after_&lt;action&gt;_failure</td>
+      <td>
+        <div>* cleanup failed remenants</div>
+        <div>* call bug tracker</div>
+        <div>* failure specific logging</div>
+      </td>
+    </tr>
+    <tr>
+      <td>after_&lt;action&gt;</td>
+      <td>
+        <div>* perform necessary required cleanup</div>
+        <div>* log outcome</div>
+      </td>
+    </tr>
+  </tbody>
 <table>
 
 
@@ -156,25 +275,25 @@ Hooks make it very easy to compose multiple actions that need to occur in a spec
 ```ruby
 # Call the webhooks for third party integrations
 after_expire_success do |options|
-    call_webhook_for_model(options[:object])
-    options
+  call_webhook_for_model(options[:object])
+  options
 end
 
 # Commit business logic to internal process
 after_expire_success do |options|
-    finalize_business_logic(options[:object])
-    options
+  finalize_business_logic(options[:object])
+  options
 end
 
 # notify error tracker
 after_expire_error do |options|
-    notify_errors(options[:object].errors)
-    options
+  notify_errors(options[:object].errors)
+  options
 end
 ```
 
 #### Methods
-Methods allow users to create inheritable actions that occur in a specific order.  Methods will always run after their hook counterpart.  Since these are inheritable, you can chain needed actions all the way through the parent heirarchy by using the `super` keyword. 
+Methods allow users to create inheritable actions that occur in a specific order.  Methods will always run after their hook counterpart.  Since these are inheritable, you can chain needed actions all the way through the parent heirarchy by using the `super` keyword.   These are very usefule when you need to have sometime always happen at the end of an Interval.
 
 <strong>Important Note</strong> Methods <u>always</u> need to return the options hash at the end.
 
@@ -186,21 +305,21 @@ Methods allow users to create inheritable actions that occur in a specific order
 # Call the webhooks for third party integrations
 # Commit business logic to internal process
 def after_expire_success(**options)
-    options = super
+  options = super
 
-    call_webhook_for_model(options[:object])
-    finalize_business_logic(options[:object])
+  call_webhook_for_model(options[:object])
+  finalize_business_logic(options[:object])
 
-    options
+  options
 end
 
 # notify error tracker
 def after_expire_error(**options)
-    options = super
+  options = super
 
-    notify_errors(options[:object].errors)
+  notify_errors(options[:object].errors)
 
-    options
+  options
 end
 ```
 
@@ -225,7 +344,7 @@ class TokenContext
 
   action :expire, with: :expire_token
 
-  authorize :expire { |options| options[:entity].is_admin? }
+  authorize(:expire) { |_options| :entity.is_admin? }
 
   ...
 end
@@ -245,8 +364,8 @@ class TokenContext
   action :search, with: :query_tokens #=> will authorize by checking the entity is a user
   action :show, with: :find_token #=> will authorize by checking the entity is a user
 
-  authorize :expire { |options| options[:entity].is_admin? }
-  authorize { |options| options[:entity].is_user? }
+  authorize(:expire) { |_options| entity.is_admin? }
+  authorize { |_options| entity.is_user? }
 
   ...
 end

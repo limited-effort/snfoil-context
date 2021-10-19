@@ -38,17 +38,24 @@ module SnFoil
         raise SnFoil::Context::Error, "action #{name} already defined for #{self.name}" if (@defined_actions ||= []).include?(name)
 
         @defined_actions << name
-        define_workflow_hooks(name)
+        define_workflow(name)
         define_action_primary(name, with, block)
+      end
+
+      def interval(name)
+        define_singleton_methods(name, "#{name}_hooks")
+        define_instance_methods(name)
+      end
+
+      def intervals(*names)
+        names.each { |name| interval(name) }
       end
     end
 
-    def run_action_group(group_name, **options)
-      hooks = self.class.instance_variable_get("@#{group_name}_hooks") || []
+    def run_interval(interval, **options)
+      hooks = self.class.instance_variable_get("@#{interval}_hooks") || []
       options = hooks.reduce(options) { |opts, hook| run_hook(hook, opts) }
-      options = send(group_name, **options) if respond_to?(group_name)
-
-      options
+      send(interval, **options)
     end
 
     private
@@ -56,38 +63,34 @@ module SnFoil
     # rubocop:disable reason:  These are builder/mapping methods that are just too complex to simplify without
     # making them more complex.  If anyone has a better way please let me know
     class_methods do # rubocop:disable Metrics/BlockLength
+      def define_workflow(name)
+        interval format('setup_%s', name)
+        interval format('before_%s', name)
+        interval format('after_%s_success', name)
+        interval format('after_%s_failure', name)
+        interval format('after_%s', name)
+      end
+
       def define_action_primary(name, method, block) # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
         define_method(name) do |**options| # rubocop:disable Metrics/MethodLength
-          options[:action] = name.to_sym
-          options = run_action_group(format('setup_%s', name), **options)
+          options[:action] ||= name.to_sym
+
+          options = run_interval(format('setup_%s', name), **options)
           authorize(name, **options) if respond_to?(:authorize)
 
-          options = run_action_group(format('before_%s', name), **options)
+          options = run_interval(format('before_%s', name), **options)
           authorize(name, **options) if respond_to?(:authorize)
 
           options = if run_action_primary(method, block, **options)
-                      run_action_group(format('after_%s_success', name), **options)
+                      run_interval(format('after_%s_success', name), **options)
                     else
-                      run_action_group(format('after_%s_failure', name), **options)
+                      run_interval(format('after_%s_failure', name), **options)
                     end
-          run_action_group(format('after_%s', name), **options)
+          run_interval(format('after_%s', name), **options)
         end
       end
 
-      def define_workflow_hooks(name)
-        hook_builder('setup_%s', name)
-        hook_builder('before_%s', name)
-        hook_builder('after_%s_success', name)
-        hook_builder('after_%s_failure', name)
-        hook_builder('after_%s', name)
-      end
-
-      def hook_builder(name_format, name)
-        assign_singleton_methods format(name_format, name),
-                                 format("#{name_format}_hooks", name)
-      end
-
-      def assign_singleton_methods(method_name, singleton_var)
+      def define_singleton_methods(method_name, singleton_var)
         instance_variable_set("@#{singleton_var}", [])
         define_singleton_method(singleton_var) { instance_variable_get("@#{singleton_var}") }
         define_singleton_method(method_name) do |method = nil, **options, &block|
@@ -97,6 +100,12 @@ module SnFoil
                                                           block: block,
                                                           if: options[:if],
                                                           unless: options[:unless] }
+        end
+      end
+
+      def define_instance_methods(method_name)
+        define_method(method_name) do |**options|
+          options
         end
       end
     end

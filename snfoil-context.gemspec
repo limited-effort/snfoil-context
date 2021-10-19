@@ -11,7 +11,7 @@ Gem::Specification.new do |spec|
   spec.summary       = 'Setup simple pipelined workflows'
   spec.description   = 'An easy way to make extensible workflows and actions'
   spec.homepage      = 'https://github.com/limited-effort/snfoil-context'
-  spec.license       = 'MIT'
+  spec.license       = 'Apache-2.0'
   spec.required_ruby_version = '>= 2.5.0'
 
   spec.metadata['homepage_uri'] = spec.homepage
