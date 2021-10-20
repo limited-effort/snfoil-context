@@ -2,7 +2,7 @@
 
 ![build](https://github.com/limited-effort/snfoil-context/actions/workflows/main.yml/badge.svg) [![maintainability](https://api.codeclimate.com/v1/badges/6a7a2f643707c17cb879/maintainability)](https://codeclimate.com/github/limited-effort/snfoil-context/maintainability)
 
-SnFoil Contexts are a simple way to insure a workflow pipeline can be easily established end extended.  It helps by creating workflow, allowing additional in steps at specific intervals, and reacting to a success or failure, you should find your code being more maintainable and testable.
+SnFoil Contexts are a simple way to ensure a workflow pipeline can be easily established end extended.  It helps by creating a workflow, allowing additional steps at specific intervals, and reacting to success or failure, you should find your code being more maintainable and testable.
 
 ## Installation
 
@@ -112,7 +112,7 @@ You can define intervals one at a time
   interval :production
 ```
 
-They can also be define in bulk using `intervals`
+They can also be defined in bulk using `intervals`
 
 ```ruby
   intervals :demo, :production
@@ -160,7 +160,7 @@ end
 TokenContext.new(current_user).expire(object: current_token)
 ```
 
-If you want to reuse the primary action or just prefer methods, you can pass in the method name you would like to call, rather than providing a block.  If a method name and a block is provided, the block is ignored. 
+If you want to reuse the primary action or just prefer methods, you can pass in the method name you would like to call, rather than providing a block.  If a method name and a block are provided, the block is ignored. 
 
 
 ```ruby
@@ -179,9 +179,9 @@ end
 ```
 
 #### Primary Function
-The primary function is the function that determine whether or not the action is successful.  To do this, the primary function must always return a truthy value if the action was successful, or a falsey one if it failed.
+The primary function is the function that determines whether or not the action is successful.  To do this, the primary function must always return a truthy value if the action was successful, or a falsey one if it failed.
 
-The primary function is passed one argument which is the return value of the closest preceeding interval function.
+The primary function is passed one argument which is the return value of the closest preceding interval function.
 
 ```ruby
 # lib/contexts/token_context
@@ -205,7 +205,7 @@ end
 ```
 
 #### Action Intervals
-The following are the intervals SnFoil Contexts sets up in the order they occur.  The suggested uses are just very simply examples.  You can chain contexts to setup very complex interactions in a very easy to manage workflow.
+The following are the intervals SnFoil Contexts set up in the order they occur.  The suggested uses are just very simple examples.  You can chain contexts to setup very complex interactions in a very easy-to-manage workflow.
 
 <table>
   <thead>
@@ -262,9 +262,9 @@ The following are the intervals SnFoil Contexts sets up in the order they occur.
 
 #### Hook and Method Design
 
-SnFoil Contexts try hard to not store variables longer than necessary.  To facilitate this we have choosen to pass an object (we normally use a hash called options) to each hook and method, and the return from the hook or method is passed down the chain to the next hook or method.  
+SnFoil Contexts try hard to not store variables longer than necessary.  To facilitate this we have chosen to pass an object (we normally use a hash called options) to each hook and method, and the return from the hook or method is passed down the chain to the next hook or method.  
 
-The only method or block that does not get its value passwed down the chain is the primary action - which must always return a truthy value of whether or not the action was successful.
+The only method or block that does not get its value passed down the chain is the primary action - which must always return a truthy value of whether or not the action was successful.
 
 #### Hooks
 Hooks make it very easy to compose multiple actions that need to occur in a specific order.  You can have as many repeated hooks as you would like.  This makes defining single responsibility hooks very simple, and they will get called in the order they are defined.
@@ -293,11 +293,11 @@ end
 ```
 
 #### Methods
-Methods allow users to create inheritable actions that occur in a specific order.  Methods will always run after their hook counterpart.  Since these are inheritable, you can chain needed actions all the way through the parent heirarchy by using the `super` keyword.   These are very usefule when you need to have sometime always happen at the end of an Interval.
+Methods allow users to create inheritable actions that occur in a specific order.  Methods will always run after their hook counterpart.  Since these are inheritable, you can chain needed actions through the parent hierarchy by using the `super` keyword.   These are very useful when you need to have something always happen at the end of an Interval.
 
 <strong>Important Note</strong> Methods <u>always</u> need to return the options hash at the end.
 
-<i>Author's opinion:</i> While simplier than hooks, they do not allow for as clean of a composition as hooks.
+<i>Author's opinion:</i> While simpler than hooks, they do not allow for as clean of a composition as hooks.
 
 ##### Example
 
@@ -328,10 +328,10 @@ The original purpose of all of SnFoil was to ensure there was a good consistent 
 
 These authorization hooks are always called twice.  Once after `setup_<action>` and once after `before_<action>`
 
-The `authorize` method functions much like primary action except the first argument is usually the name of action you are authorizing.
+The `authorize` method functions much like primary action except the first argument is usually the name of the action you are authorizing.
 
 Arguments:
-* `name` - The name of this action to be authorized.  If ommited, all actions without a specific associated authorize will use this one..
+* `name` - The name of this action to be authorized.  If omitted, all actions without a specific associated authorize will use this
 * `with` - Keyword Param - The method name of the primary action.  Either this or a block is required
 * `block` - Block -  The block of the primary action.  Either this or with is required
 
@@ -350,7 +350,7 @@ class TokenContext
 end
 ```
 
-You can also call authorize without an action name.  This will have all action authorize with the provided method or block unless there is a more specific authorize action configured.  Its probably easier explained with an example
+You can also call authorize without an action name.  This will have all action authorize with the provided method or block unless there is a more specific authorize action configured.  It's probably easier explained with an example
 
 
 ```ruby
@@ -372,7 +372,7 @@ end
 ```
 
 #### Why before and after?
-Simply to make sure the entity it actually allowed access the primary target and is allowed to make the requested alterations/interactions.
+Simply to make sure the entity is allowed access to the primary target and is allowed to make the requested alterations/interactions.
 
 ## Development
 
@@ -390,4 +390,4 @@ The gem is available as open source under the terms of the [Apache 2 License](ht
 
 ## Code of Conduct
 
-Everyone interacting in the Snfoil::Context project's codebases, issue trackers, chat rooms and mailing lists is expected to follow the [code of conduct](https://github.com/limited-effort/snfoil-context/blob/main/CODE_OF_CONDUCT.md).
+Everyone interacting in the Snfoil::Context project's codebases, issue trackers, chat rooms, and mailing lists is expected to follow the [code of conduct](https://github.com/limited-effort/snfoil-context/blob/main/CODE_OF_CONDUCT.md).
