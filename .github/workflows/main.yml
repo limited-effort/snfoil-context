@@ -1,5 +1,5 @@
 name: build
-on: 
+on:
   push:
     branches: [ main ]
   pull_request:
@@ -43,4 +43,7 @@ jobs:
         run: bundle install
       - name: Run rubocop
         run: bundle exec rubocop
-
+      - name: Run fasterer
+        run: bundle exec fasterer
+      - name: Run bundle audit
+        run: bundle exec bundle audit check --update

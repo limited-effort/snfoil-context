@@ -24,6 +24,7 @@ Lint/EmptyClass:
 Metrics/BlockLength:
   Exclude:
     - spec/**/*_spec.rb
+    - snfoil-context.gemspec
 
 # ================ RSPEC ================
 RSpec/FilePath:
