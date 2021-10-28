@@ -24,17 +24,8 @@ require 'snfoil/context'
 class TokenContext
   include SnFoil::Context
 
-  interval :always
-
   action(:create) { |options| options[:object].save }
   action(:expire) { |options| options[:object].update(expired_at: Time.current) }
-
-  # log the current action. . . because reasons?
-  always { |options| LocalLogger.debug "START Running #{options[:action]}" }
-
-  # run always interval
-  setup_expire { |options| run_interval(:always, **options) }
-  setup_create { |options| run_interval(:always, **options) }
 
   # inject created_by
   setup_create { |options| options[:params][:created_by] = entity }
@@ -62,64 +53,8 @@ When you `new` up a SnFoil Context you should provide the entity running the act
   TokenContext.new(current_user)
 ```
 
-### Intervals
-Intervals are a collection of `Proc` functions and a final method.  Each `proc` of the interval will pass the return of the first to the next.
-
-You can run an interval by calling `run_interval` with the interval name as the first argument and an optional options keyword arguments.
-
-```ruby
-class TokenContext
-  include SnFoil::Context
-
-  interval :demo
-
-  def demo(**options)
-    puts 'Demo Method'
-    options
-  end
-
-  demo do |options|
-    puts "First Proc"
-    puts options
-
-    options[:foo] = :bar
-
-    options
-  end
-
-  demo do |options|
-    puts "Second Proc"
-    puts options
-
-    options
-  end
-end
-
-TokenContext.new.run_interval(:demo, lorem: :ipsum)
-  # console>    First Proc
-  # console>    { lorem: :ipsum }
-  # console>    Second Proc
-  # console>    { foo: :bar, lorem: :ipsum }
-  # console>    Demo Method
-```
-
-### Multiple Intervals
-
-You can define intervals one at a time
-
-```ruby
-  interval :demo
-  interval :production
-```
-
-They can also be defined in bulk using `intervals`
-
-```ruby
-  intervals :demo, :production
-```
-
 ### Actions
-Actions are a group of intervals that create a workflow around a single primary function.
+Actions are a group of hookable intervals that create a workflow around a single primary function.
 
 To start you will need to define an action.  
 
@@ -373,6 +308,35 @@ end
 
 #### Why before and after?
 Simply to make sure the entity is allowed access to the primary target and is allowed to make the requested alterations/interactions.
+
+### Intervals
+There might be a situation where you don't need a before, after, success or failure, and just need a single name pipeline you can hook into. `interval` allows you to create a single action-like segment.
+
+```ruby
+class TokenContext
+  include SnFoil::Context
+
+  interval :demo
+
+  demo do |options|
+    ... # Logic Here
+
+    options
+  end
+
+  demo do |options|
+    ... # Additional Steps here
+
+    options
+  end
+end
+```
+
+Just like for an action SnFoil allows you to define both hooks and a method.  To run this interval you call it using the `run_interval` method.
+
+```ruby
+TokenContext.new(entity).run_interval(:demo, **options)
+```
 
 ## Development
 
