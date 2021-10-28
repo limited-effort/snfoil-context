@@ -2,6 +2,7 @@
 
 require 'spec_helper'
 require_relative '../../canary'
+require 'pry'
 
 RSpec.describe SnFoil::Context::Structure do
   let(:including_class) { Class.new StructureClass }
@@ -13,7 +14,7 @@ RSpec.describe SnFoil::Context::Structure do
       before { including_class.authorize(:create) { |**_options| canary.sing('create') } }
 
       it 'populates the authorizations object' do
-        expect(including_class.i_authorizations.keys).to include :create
+        expect(including_class.snfoil_authorizations.keys).to include :create
       end
     end
 
@@ -21,7 +22,7 @@ RSpec.describe SnFoil::Context::Structure do
       before { including_class.authorize { |**_options| canary.sing('nil') } }
 
       it 'populates the authorizations object' do
-        expect(including_class.i_authorizations.keys).to include nil
+        expect(including_class.snfoil_authorizations.keys).to include nil
       end
     end
 
@@ -79,8 +80,20 @@ RSpec.describe SnFoil::Context::Structure do
       end
     end
   end
+
+  describe 'inheritance' do
+    it 'assigns instance variables to subclass' do
+      expect(InheritedStructureClass.instance_variables).to include(:@snfoil_authorizations)
+      expect(InheritedStructureClass.instance_variable_get(:@snfoil_authorizations).keys).to include(:demo)
+    end
+  end
 end
 
 class StructureClass
   include SnFoil::Context::Structure
+
+  authorize(:demo) { |**_| true }
+end
+
+class InheritedStructureClass < StructureClass
 end

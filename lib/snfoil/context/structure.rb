@@ -28,15 +28,25 @@ module SnFoil
       extend ActiveSupport::Concern
 
       class_methods do
-        attr_reader :i_authorizations
+        attr_accessor :snfoil_authorizations
 
         def authorize(action_name = nil, with: nil, &block)
-          @i_authorizations ||= {}
+          @snfoil_authorizations ||= {}
           action_name = action_name&.to_sym
 
-          raise SnFoil::Context::Error, "#{name} already has authorize defined for #{action_name || ':default'}" if @i_authorizations[action_name]
+          if @snfoil_authorizations[action_name]
+            raise SnFoil::Context::Error, "#{name} already has authorize defined for #{action_name || ':default'}"
+          end
 
-          @i_authorizations[action_name] = { method: with, block: block }
+          @snfoil_authorizations[action_name] = { method: with, block: block }
+        end
+
+        def inherited(subclass)
+          super
+
+          instance_variables.grep(/@snfoil_.+/).each do |i|
+            subclass.instance_variable_set(i, instance_variable_get(i).dup)
+          end
         end
       end
 
@@ -47,8 +57,8 @@ module SnFoil
       end
 
       def authorize(name, **options)
-        configured_call = self.class.i_authorizations&.fetch(name.to_sym, nil)
-        configured_call ||= self.class.i_authorizations&.fetch(nil, nil)
+        configured_call = self.class.snfoil_authorizations&.fetch(name.to_sym, nil)
+        configured_call ||= self.class.snfoil_authorizations&.fetch(nil, nil)
 
         if configured_call
           run_hook(configured_call, **options)

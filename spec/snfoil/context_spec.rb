@@ -140,8 +140,24 @@ RSpec.describe SnFoil::Context do
       end
     end
   end
+
+  describe 'inheritance' do
+    it 'assigns instance variables to subclass' do
+      expect(InheritedBuilderClass.instance_variables).to include(:@snfoil_demo_hooks)
+    end
+
+    it 'assigns methods the subclass' do
+      expect(InheritedBuilderClass.respond_to?(:demo)).to be true
+      expect(InheritedBuilderClass.new.respond_to?(:demo)).to be true
+    end
+  end
 end
 
 class BuilderClass
   include SnFoil::Context
+
+  interval :demo
+end
+
+class InheritedBuilderClass < BuilderClass
 end

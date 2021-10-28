@@ -35,15 +35,15 @@ module SnFoil
 
     class_methods do
       def action(name, with: nil, &block)
-        raise SnFoil::Context::Error, "action #{name} already defined for #{self.name}" if (@defined_actions ||= []).include?(name)
+        raise SnFoil::Context::Error, "action #{name} already defined for #{self.name}" if (@snfoil_actions ||= []).include?(name)
 
-        @defined_actions << name
+        @snfoil_actions << name
         define_workflow(name)
         define_action_primary(name, with, block)
       end
 
       def interval(name)
-        define_singleton_methods(name, "#{name}_hooks")
+        define_singleton_methods(name)
         define_instance_methods(name)
       end
 
@@ -53,7 +53,7 @@ module SnFoil
     end
 
     def run_interval(interval, **options)
-      hooks = self.class.instance_variable_get("@#{interval}_hooks") || []
+      hooks = self.class.instance_variable_get("@snfoil_#{interval}_hooks") || []
       options = hooks.reduce(options) { |opts, hook| run_hook(hook, **opts) }
       send(interval, **options)
     end
@@ -90,7 +90,8 @@ module SnFoil
         end
       end
 
-      def define_singleton_methods(method_name, singleton_var)
+      def define_singleton_methods(method_name)
+        singleton_var = "snfoil_#{method_name}_hooks"
         instance_variable_set("@#{singleton_var}", [])
         define_singleton_method(singleton_var) { instance_variable_get("@#{singleton_var}") }
         define_singleton_method(method_name) do |method = nil, **options, &block|
