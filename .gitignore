@@ -12,3 +12,6 @@
 
 # GEMFILE
 Gemfile.lock
+
+# GEM
+/*.gem

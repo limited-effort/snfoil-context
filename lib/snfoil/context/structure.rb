@@ -50,10 +50,13 @@ module SnFoil
         end
       end
 
-      attr_reader :entity
+      def initialize(*args, **keywords, &block)
+        super(*args, **keywords, &block) if defined? super
+        @entity = keywords[:entity]
+      end
 
-      def initialize(entity = nil)
-        @entity = entity
+      def entity
+        @entity
       end
 
       def authorize(name, **options)

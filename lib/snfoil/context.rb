@@ -64,11 +64,11 @@ module SnFoil
     # making them more complex.  If anyone has a better way please let me know
     class_methods do # rubocop:disable Metrics/BlockLength
       def define_workflow(name)
-        interval format('setup_%s', name)
-        interval format('before_%s', name)
-        interval format('after_%s_success', name)
-        interval format('after_%s_failure', name)
-        interval format('after_%s', name)
+        interval "setup_#{name}"
+        interval "before_#{name}"
+        interval "after_#{name}_success"
+        interval "after_#{name}_failure"
+        interval "after_#{name}"
       end
 
       def define_action_primary(name, method, block) # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
