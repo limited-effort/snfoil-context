@@ -50,42 +50,43 @@ module SnFoil
         end
       end
 
-      def initialize(*args, **keywords, &block)
-        super(*args, **keywords, &block) if defined? super
-        @entity = keywords[:entity]
-      end
+      included do # rubocop:disable Metrics/BlockLength reasdon: inheritance
+        def initialize(**keywords)
+          @entity = keywords[:entity]
+        end
 
-      def entity
-        @entity
-      end
+        def entity
+          @entity
+        end
 
-      def authorize(name, **options)
-        configured_call = self.class.snfoil_authorizations&.fetch(name.to_sym, nil)
-        configured_call ||= self.class.snfoil_authorizations&.fetch(nil, nil)
+        def authorize(name, **options)
+          configured_call = self.class.snfoil_authorizations&.fetch(name.to_sym, nil)
+          configured_call ||= self.class.snfoil_authorizations&.fetch(nil, nil)
 
-        if configured_call
-          run_hook(configured_call, **options)
-        else
-          SnFoil.logger.info "No configuration for #{name} in #{self.class.name}. Authorize not called" if SnFoil.respond_to?(:logger)
+          if configured_call
+            run_hook(configured_call, **options)
+          else
+            SnFoil.logger.info "No configuration for #{name} in #{self.class.name}. Authorize not called" if SnFoil.respond_to?(:logger)
+            true
+          end
+        end
+
+        private
+
+        def run_hook(hook, **options)
+          return options unless hook && hook_valid?(hook, **options)
+
+          return send(hook[:method], **options) if hook[:method]
+
+          instance_exec(**options, &hook[:block])
+        end
+
+        def hook_valid?(hook, **options)
+          return false if !hook[:if].nil? && hook[:if].call(**options) == false
+          return false if !hook[:unless].nil? && hook[:unless].call(**options) == true
+
           true
         end
-      end
-
-      private
-
-      def run_hook(hook, **options)
-        return options unless hook && hook_valid?(hook, **options)
-
-        return send(hook[:method], **options) if hook[:method]
-
-        instance_exec(**options, &hook[:block])
-      end
-
-      def hook_valid?(hook, **options)
-        return false if !hook[:if].nil? && hook[:if].call(**options) == false
-        return false if !hook[:unless].nil? && hook[:unless].call(**options) == true
-
-        true
       end
     end
   end
