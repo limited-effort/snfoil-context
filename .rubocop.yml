@@ -38,3 +38,8 @@ RSpec/MultipleMemoizedHelpers:
 
 RSpec/NestedGroups:
   Max: 5
+
+# ================ STYLE ================
+Style/OpenStructUse:
+  Exclude:
+    - spec/**/*.rb
