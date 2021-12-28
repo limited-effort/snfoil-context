@@ -94,10 +94,10 @@ module SnFoil
         singleton_var = "snfoil_#{method_name}_hooks"
         instance_variable_set("@#{singleton_var}", [])
         define_singleton_method(singleton_var) { instance_variable_get("@#{singleton_var}") }
-        define_singleton_method(method_name) do |method = nil, **options, &block|
-          raise SnFoil::Context::ArgumentError, "\##{method_name} requires either a method name or a block" if method.nil? && block.nil?
+        define_singleton_method(method_name) do |with: nil, **options, &block|
+          raise SnFoil::Context::ArgumentError, "\##{method_name} requires either a method name or a block" if with.nil? && block.nil?
 
-          instance_variable_get("@#{singleton_var}") << { method: method,
+          instance_variable_get("@#{singleton_var}") << { method: with,
                                                           block: block,
                                                           if: options[:if],
                                                           unless: options[:unless] }
