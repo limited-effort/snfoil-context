@@ -51,12 +51,10 @@ module SnFoil
       end
 
       included do # rubocop:disable Metrics/BlockLength reasdon: inheritance
+        attr_reader :entity
+
         def initialize(**keywords)
           @entity = keywords[:entity]
-        end
-
-        def entity
-          @entity
         end
 
         def authorize(name, **options)
