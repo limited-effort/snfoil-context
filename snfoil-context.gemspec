@@ -12,7 +12,7 @@ Gem::Specification.new do |spec|
   spec.description   = 'An easy way to make extensible workflows and actions'
   spec.homepage      = 'https://github.com/limited-effort/snfoil-context'
   spec.license       = 'Apache-2.0'
-  spec.required_ruby_version = '>= 2.5.0'
+  spec.required_ruby_version = '>= 2.7'
 
   spec.metadata['homepage_uri'] = spec.homepage
   spec.metadata['source_code_uri'] = spec.homepage
@@ -31,11 +31,11 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'activesupport', '>= 5.2.6'
 
   spec.add_development_dependency 'bundle-audit', '~> 0.1.0'
-  spec.add_development_dependency 'fasterer', '~> 0.9.0'
+  spec.add_development_dependency 'fasterer', '~> 0.10.0'
   spec.add_development_dependency 'pry-byebug', '~> 3.9'
   spec.add_development_dependency 'rake', '~> 13.0'
   spec.add_development_dependency 'rspec', '~> 3.10'
-  spec.add_development_dependency 'rubocop', '1.23'
+  spec.add_development_dependency 'rubocop', '~> 1.29'
   spec.add_development_dependency 'rubocop-performance', '~> 1.11'
   spec.add_development_dependency 'rubocop-rspec', '~> 2.5'
 end
