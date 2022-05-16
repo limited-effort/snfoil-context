@@ -50,7 +50,7 @@ end
 When you `new` up a SnFoil Context you should provide the entity running the actions.  This will usually be a user but you can pass in anything.  This will be accessible from within the context as `entity`.
 
 ```ruby
-  TokenContext.new(current_user)
+  TokenContext.new(entity: current_user)
 ```
 
 ### Actions
@@ -92,7 +92,7 @@ class TokenContext
   action(:expire) { |options| options[:object].update(expired_at: Time.current) }
 end
 
-TokenContext.new(current_user).expire(object: current_token)
+TokenContext.new(entity: current_user).expire(object: current_token)
 ```
 
 If you want to reuse the primary action or just prefer methods, you can pass in the method name you would like to call, rather than providing a block.  If a method name and a block are provided, the block is ignored. 
@@ -335,7 +335,7 @@ end
 Just like for an action SnFoil allows you to define both hooks and a method.  To run this interval you call it using the `run_interval` method.
 
 ```ruby
-TokenContext.new(entity).run_interval(:demo, **options)
+TokenContext.new(entity: entity).run_interval(:demo, **options)
 ```
 
 ## Development
