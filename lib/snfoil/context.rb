@@ -105,6 +105,8 @@ module SnFoil
       end
 
       def define_instance_methods(method_name)
+        return if method_defined? method_name
+
         define_method(method_name) do |**options|
           options
         end
