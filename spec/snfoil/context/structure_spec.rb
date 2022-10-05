@@ -2,7 +2,6 @@
 
 require 'spec_helper'
 require_relative '../../canary'
-require 'pry'
 
 RSpec.describe SnFoil::Context::Structure do
   let(:including_class) { Class.new StructureClass }

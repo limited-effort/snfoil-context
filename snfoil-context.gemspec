@@ -29,13 +29,4 @@ Gem::Specification.new do |spec|
   spec.require_paths = ['lib']
 
   spec.add_dependency 'activesupport', '>= 5.2.6'
-
-  spec.add_development_dependency 'bundle-audit', '~> 0.1.0'
-  spec.add_development_dependency 'fasterer', '~> 0.10.0'
-  spec.add_development_dependency 'pry-byebug', '~> 3.9'
-  spec.add_development_dependency 'rake', '~> 13.0'
-  spec.add_development_dependency 'rspec', '~> 3.10'
-  spec.add_development_dependency 'rubocop', '1.33'
-  spec.add_development_dependency 'rubocop-performance', '1.14.3'
-  spec.add_development_dependency 'rubocop-rspec', '2.12.1'
 end
