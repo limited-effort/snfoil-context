@@ -309,6 +309,14 @@ end
 #### Why before and after?
 Simply to make sure the entity is allowed access to the primary target and is allowed to make the requested alterations/interactions.
 
+#### Did Authorize Run?
+If there is a valid policy to call SnFoil-Context will update the `:authorize` key in the options.
+
+Values are:
+ - `false` - The authorize method never ran
+ - `:setup` - The authorize method ran after the setup interval (the first run)
+ - `:before` - The authorize method ran after the before interval (the second run)
+
 ### Intervals
 There might be a situation where you don't need a before, after, success or failure, and just need a single name pipeline you can hook into. `interval` allows you to create a single action-like segment.
 
