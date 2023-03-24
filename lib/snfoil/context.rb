@@ -74,20 +74,14 @@ module SnFoil
       def define_action_primary(name, method, block) # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
         define_method(name) do |*_args, **options| # rubocop:disable Metrics/MethodLength
           options[:action] ||= name.to_sym
-          options[:authorized] = false
 
           options = run_interval(format('setup_%s', name), **options)
 
-          if respond_to?(:authorize)
-            authorize(name, **options)
-            options[:authorized] = :setup
-          end
+          authorize(name, **options) if respond_to?(:authorize) && !options[:skip_first_authorize]
 
           options = run_interval(format('before_%s', name), **options)
-          if respond_to?(:authorize)
-            authorize(name, **options)
-            options[:authorized] = :before
-          end
+
+          authorize(name, **options) if respond_to?(:authorize) && !options[:skip_last_authorize]
 
           options = if run_action_primary(method, block, **options)
                       run_interval(format('after_%s_success', name), **options)

@@ -122,6 +122,24 @@ RSpec.describe SnFoil::Context do
           end.to raise_error SnFoil::Context::Error
         end
       end
+
+      context 'when options[:skip_first_authorize] is truthy' do
+        it 'doesn\'t authenticate before before_{:action}' do
+          including_class.new.create(canary: canary, skip_first_authorize: true, resp: true)
+          before_index = canary.song.index { |s| s[:data] == 'before_create' }
+          expect(canary.song[before_index - 1][:data]).not_to eq('authenticate')
+          expect(canary.song[before_index + 1][:data]).to eq('authenticate')
+        end
+      end
+
+      context 'when options[:skip_last_authorize] is truthy' do
+        it 'doesn\'t authenticate after before_{:action}' do
+          including_class.new.create(canary: canary, skip_last_authorize: true, resp: true)
+          before_index = canary.song.index { |s| s[:data] == 'before_create' }
+          expect(canary.song[before_index - 1][:data]).to eq('authenticate')
+          expect(canary.song[before_index + 1][:data]).not_to eq('authenticate')
+        end
+      end
     end
 
     context 'when using a method' do
