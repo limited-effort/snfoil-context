@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require_relative './error'
+require_relative 'error'
 require 'active_support/concern'
 
 module SnFoil
