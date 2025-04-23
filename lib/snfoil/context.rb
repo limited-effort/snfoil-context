@@ -14,9 +14,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require_relative './context/error'
-require_relative './context/argument_error'
-require_relative './context/structure'
+require_relative 'context/error'
+require_relative 'context/argument_error'
+require_relative 'context/structure'
 
 require 'active_support/concern'
 
@@ -60,7 +60,7 @@ module SnFoil
 
     private
 
-    # rubocop:disable reason:  These are builder/mapping methods that are just too complex to simplify without
+    # rubocop disable reason:  These are builder/mapping methods that are just too complex to simplify without
     # making them more complex.  If anyone has a better way please let me know
     class_methods do # rubocop:disable Metrics/BlockLength
       def define_workflow(name)
@@ -97,7 +97,7 @@ module SnFoil
         instance_variable_set("@#{singleton_var}", [])
         define_singleton_method(singleton_var) { instance_variable_get("@#{singleton_var}") }
         define_singleton_method(method_name) do |with: nil, **options, &block|
-          raise SnFoil::Context::ArgumentError, "\##{method_name} requires either a method name or a block" if with.nil? && block.nil?
+          raise SnFoil::Context::ArgumentError, "##{method_name} requires either a method name or a block" if with.nil? && block.nil?
 
           instance_variable_get("@#{singleton_var}") << { method: with,
                                                           block: block,
