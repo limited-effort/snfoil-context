@@ -117,8 +117,9 @@ module SnFoil
 
     def run_action_primary(method, block, **options)
       return send(method, **options) if method
+      return instance_exec(**options, &block) if block
 
-      instance_exec(**options, &block)
+      true
     end
   end
 end
