@@ -157,6 +157,13 @@ RSpec.describe SnFoil::Context do
         expect(canary.sung?('method_call')).to be true
       end
     end
+
+    context 'when no block or method is provided' do
+      it 'allows the action to be run' do
+        including_class.action(:create)
+        expect { including_class.new.create }.not_to raise_error
+      end
+    end
   end
 
   describe 'inheritance' do
