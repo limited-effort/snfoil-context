@@ -24,16 +24,6 @@ RSpec.describe SnFoil::Context::Structure do
         expect(including_class.snfoil_authorizations.keys).to include nil
       end
     end
-
-    context 'with an action already defined' do
-      before { including_class.authorize(:create) { |**_options| canary.sing('create') } }
-
-      it 'raises an error' do
-        expect do
-          including_class.authorize(:create) { |**_options| canary.sing('other') }
-        end.to raise_error SnFoil::Context::Error
-      end
-    end
   end
 
   describe '#authorize' do

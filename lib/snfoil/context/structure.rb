@@ -34,10 +34,6 @@ module SnFoil
           @snfoil_authorizations ||= {}
           action_name = action_name&.to_sym
 
-          if @snfoil_authorizations[action_name]
-            raise SnFoil::Context::Error, "#{name} already has authorize defined for #{action_name || ':default'}"
-          end
-
           @snfoil_authorizations[action_name] = { method: with, block: block }
         end
 
